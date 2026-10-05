@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор постов</title>
+
+    <!-- Подключаем стили -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Задний фон с мягким градиентом и «плавающими» кругами (декор) -->
+    <div class="bg-decor" aria-hidden="true">
+        <span class="blob blob-1"></span>
+        <span class="blob blob-2"></span>
+        <span class="blob blob-3"></span>
+    </div>
+
+    <!-- Основная раскладка: карточка + справочная панель -->
+    <main class="layout">
+
+        <!-- ============ КАРТОЧКА С ФОРМОЙ ============ -->
+        <section class="card">
+
+            <header class="header">
+                <h1>✨ Генератор постов</h1>
+                <p>Заполни поля — и получи готовый пост для своего товара за секунду.</p>
+            </header>
+
+            <!-- ============ ФОРМА ============ -->
+            <form id="post-form" class="form" autocomplete="off">
+
+                <!-- ====== Переключатель режимов ======
+                     «Шаблон»   — сборка текста по готовому шаблону (без интернета).
+                     «Нейросеть» — пост пишет AI по ссылке на страницу товара.
+                     Активная кнопка подсвечивается через JavaScript. -->
+                <div class="mode-switch" role="tablist" aria-label="Режим генерации">
+                    <button type="button" class="mode-btn active" data-mode="template">
+                        🧩 Шаблон
+                    </button>
+                    <button type="button" class="mode-btn" data-mode="ai">
+                        🤖 Нейросеть
+                    </button>
+                </div>
+
+                <!-- ========== ГРУППА ПОЛЕЙ РЕЖИМА «ШАБЛОН» ========== -->
+                <!-- Все поля собраны в одну группу: она видна только в режиме «Шаблон». -->
+                <div class="mode-group" id="template-group">
+
+                    <!-- Название товара -->
+                    <div class="field">
+                        <label for="name">Название товара</label>
+                        <input type="text" id="name" name="name"
+                               placeholder="Например: Керамическая кружка с подогревом">
+                    </div>
+
+                    <!-- Описание товара (обязательное в режиме «Шаблон») -->
+                    <div class="field">
+                        <label for="description">
+                            Описание товара <span class="required">*</span>
+                        </label>
+                        <textarea id="description" name="description" rows="3"
+                                  placeholder="Расскажи, что это за товар и чем он хорош"></textarea>
+                        <!-- Сообщение об ошибке появляется, если поле пустое -->
+                        <p class="field-error" id="description-error" hidden>
+                            Пожалуйста, заполни описание товара
+                        </p>
+                    </div>
+
+                    <!-- Цена или выгода -->
+                    <div class="field">
+                        <label for="benefit">Цена или выгода</label>
+                        <input type="text" id="benefit" name="benefit"
+                               placeholder="Например: всего 1 990 ₽ или скидка 20%">
+                    </div>
+                </div>
+
+                <!-- ========== ГРУППА ПОЛЕЙ РЕЖИМА «НЕЙРОСЕТЬ» ========== -->
+                <!-- Здесь только ссылка — название, цену и настроение нейросеть
+                     определит сама по содержимому страницы. -->
+                <div class="mode-group" id="ai-group" hidden>
+
+                    <!-- Ссылка на страницу товара (обязательная в режиме «Нейросеть») -->
+                    <div class="field">
+                        <label for="link">
+                            Ссылка на страницу товара <span class="required">*</span>
+                        </label>
+                        <input type="url" id="link" name="link"
+                               placeholder="https://example.ru/product/12345">
+                        <small class="hint">
+                            Нейросеть сама прочитает страницу, придумает название,
+                            цену и настроение — и напишет пост.
+                        </small>
+                        <!-- Сообщение об ошибке появляется, если ссылка пустая или недоступна -->
+                        <p class="field-error" id="link-error" hidden>
+                            Вставь ссылку на товар
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Настроение поста (общее для обоих режимов —
+                     тон всегда выбирает пользователь) -->
+                <div class="field">
+                    <label for="mood">Настроение поста</label>
+                    <select id="mood" name="mood">
+                        <option value="яркий">яркий ✨</option>
+                        <option value="деловой">деловой 📌</option>
+                        <option value="дружелюбный">дружелюбный 💛</option>
+                    </select>
+                    <!-- Подсказка: как настроить голос, описано в voice.md -->
+                    <small class="hint">Тон, длина и эмодзи меняются в файле voice.md</small>
+                </div>
+
+                <!-- Кнопка отправки -->
+                <button type="submit" class="btn-primary" id="generate-btn">
+                    Сформировать пост
+                </button>
+            </form>
+
+            <!-- ============ БЛОК «ГОТОВЫЙ ПОСТ» ============ -->
+            <!-- Появляется только после генерации (скрипт снимает атрибут hidden) -->
+            <section class="result" id="result-section" hidden>
+                <h2>Готовый пост</h2>
+
+                <!-- Сюда JavaScript вставит сгенерированный текст -->
+                <div class="post-output" id="post-output"></div>
+
+                <div class="actions">
+                    <!-- Кнопка копирования -->
+                    <button type="button" class="btn-secondary" id="copy-btn">
+                        Скопировать пост
+                    </button>
+                    <!-- Сообщение, которое появляется после нажатия «Скопировать» -->
+                    <span class="copy-feedback" id="copy-feedback" hidden>Пост скопирован</span>
+                </div>
+            </section>
+
+        </section>
+
+        <!-- ============ СПРАВОЧНАЯ ПАНЕЛЬ ============ -->
+        <aside class="hint-card">
+            <h3>Как устроены настройки</h3>
+            <ul>
+                <li><b>Тон</b> — яркий, деловой или дружелюбный</li>
+                <li><b>Эмодзи</b> — добавляются в конец поста</li>
+                <li><b>Заголовок</b> — приветствие из шаблона / инструкция для AI</li>
+                <li><b>Нейросеть</b> — ключ API задаётся в файле .env</li>
+            </ul>
+            <p>Полное описание — в файле <code>voice.md</code>.</p>
+        </aside>
+
+    </main>
+
+    <!-- Подключаем скрипт -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

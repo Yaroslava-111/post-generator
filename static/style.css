@@ -1,0 +1,341 @@
+/* =========================================================================
+   СТИЛИ ПРОЕКТА «ГЕНЕРАТОР ПОСТОВ»
+   Современный, мягкий дизайн: градиенты, плавные переходы, крупные формы.
+   ========================================================================= */
+
+/* --- Базовые настройки --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    /* Палитра — яркая, но мягкая для глаз */
+    --bg-1: #667eea;      /* верх градиента фона */
+    --bg-2: #764ba2;      /* низ градиента фона */
+    --card-bg: #ffffff;
+    --accent: #6c5ce7;    /* основной акцентный цвет */
+    --accent-dark: #5a4bcf;
+    --text: #2d3436;
+    --muted: #7a8494;
+    --error: #ff4d6d;
+    --success: #2ecc71;
+    --radius: 18px;
+    --shadow: 0 24px 60px rgba(45, 45, 90, 0.25);
+}
+
+body {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--text);
+    background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+/* --- Плавающие декоративные круги на фоне --- */
+.bg-decor {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.5;
+    animation: float 12s ease-in-out infinite;
+}
+
+.blob-1 { width: 320px; height: 320px; background: #a29bfe; top: -80px; left: -80px; }
+.blob-2 { width: 260px; height: 260px; background: #fd79a8; bottom: -60px; right: -40px; animation-delay: -4s; }
+.blob-3 { width: 180px; height: 180px; background: #ffeaa7; top: 55%; left: 60%; animation-delay: -8s; }
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(30px, -30px) scale(1.15); }
+}
+
+/* --- Основная раскладка: форма слева, справка справа --- */
+.layout {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    max-width: 980px;
+    width: 100%;
+}
+
+/* --- Карточка с формой --- */
+.card {
+    flex: 1 1 640px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 36px 40px 40px;
+}
+
+.header h1 {
+    font-size: 2rem;
+    margin-bottom: 6px;
+    letter-spacing: 0.2px;
+}
+
+.header p {
+    color: var(--muted);
+    margin-bottom: 26px;
+}
+
+/* --- Переключатель режимов «Шаблон / Нейросеть» --- */
+.mode-switch {
+    display: flex;
+    background: #f0effa;
+    border-radius: 14px;
+    padding: 5px;
+    margin-bottom: 22px;
+    gap: 5px;
+}
+
+.mode-btn {
+    flex: 1;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Активный режим — белая таблетка с тенью */
+.mode-btn.active {
+    color: var(--accent);
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(45, 45, 90, 0.12);
+}
+
+.mode-btn:hover:not(.active) {
+    color: var(--text);
+}
+
+/* --- Поля формы --- */
+.field {
+    margin-bottom: 18px;
+}
+
+.field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+/* Звёздочка у обязательного поля */
+.required {
+    color: var(--error);
+}
+
+/* Общие стили для input / textarea / select */
+.field input,
+.field textarea,
+.field select {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text);
+    background: #f6f7fb;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+/* Подсветка поля при фокусе */
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+}
+
+/* Текст-подсказка под селектом */
+.hint {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+/* --- Сообщение об ошибке (скрыто по умолчанию) --- */
+.field-error {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--error);
+    font-weight: 600;
+}
+
+/* Класс «поле с ошибкой» добавляется скриптом к текстовой области */
+.field.invalid textarea {
+    border-color: var(--error);
+    background: #fff5f7;
+}
+
+/* --- Кнопки --- */
+.btn-primary,
+.btn-secondary {
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 13px 22px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+/* Главная кнопка — градиентная */
+.btn-primary {
+    width: 100%;
+    margin-top: 6px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--bg-2));
+    box-shadow: 0 12px 26px rgba(108, 92, 231, 0.35);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(108, 92, 231, 0.45);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Вторичная кнопка в блоке результата */
+.btn-secondary {
+    color: var(--accent);
+    background: #efeaff;
+}
+
+.btn-secondary:hover {
+    background: #e2d9ff;
+}
+
+/* --- Блок «Готовый пост» --- */
+.result {
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 26px;
+    animation: fade-in 0.4s ease;
+}
+
+.result h2 {
+    margin-bottom: 12px;
+    font-size: 1.15rem;
+}
+
+/* Контейнер с готовым текстом */
+.post-output {
+    background: #f6f7fb;
+    border-radius: 12px;
+    padding: 16px 18px;
+    white-space: pre-wrap;      /* сохраняем переносы строк как в сгенерированном тексте */
+    line-height: 1.55;
+    font-size: 0.95rem;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+/* Ряд действий: кнопка + сообщение о копировании */
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.copy-feedback {
+    color: var(--success);
+    font-weight: 600;
+    animation: fade-in 0.3s ease;
+}
+
+/* Класс «скрыто» для сообщений — меняем через JS */
+[hidden] {
+    display: none !important;
+}
+
+/* --- Справочная панель справа --- */
+.hint-card {
+    flex: 0 0 260px;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px 22px;
+}
+
+.hint-card h3 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    color: var(--accent);
+}
+
+.hint-card ul {
+    list-style: none;
+}
+
+.hint-card li {
+    font-size: 0.88rem;
+    color: var(--text);
+    padding: 6px 0;
+    border-bottom: 1px dashed #e4e4e4;
+}
+
+.hint-card li:last-child {
+    border-bottom: none;
+}
+
+.hint-card code {
+    background: #f0edff;
+    color: var(--accent-dark);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+}
+
+.hint-card p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 12px;
+}
+
+/* --- Анимации --- */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Адаптивность: на маленьких экранах панель справки уходит вниз --- */
+@media (max-width: 820px) {
+    .layout {
+        flex-direction: column;
+    }
+
+    .hint-card {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}
