@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Генератор постов</title>
+    <!-- Пустая иконка — чтобы браузер не запрашивал /favicon.ico (404 в консоли) -->
+    <link rel="icon" href="data:,">
 
     <!-- Подключаем стили -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -24,7 +26,7 @@
         <section class="card">
 
             <header class="header">
-                <h1>✨ Генератор постов</h1>
+                <h1>Генератор постов</h1>
                 <p>Заполни поля — и получи готовый пост для своего товара за секунду.</p>
             </header>
 
@@ -37,10 +39,13 @@
                      Активная кнопка подсвечивается через JavaScript. -->
                 <div class="mode-switch" role="tablist" aria-label="Режим генерации">
                     <button type="button" class="mode-btn active" data-mode="template">
-                        🧩 Шаблон
+                        Шаблон
                     </button>
                     <button type="button" class="mode-btn" data-mode="ai">
-                        🤖 Нейросеть
+                        Нейросеть
+                    </button>
+                    <button type="button" class="mode-btn" data-mode="batch">
+                        Пакетная
                     </button>
                 </div>
 
@@ -53,6 +58,25 @@
                         <label for="name">Название товара</label>
                         <input type="text" id="name" name="name"
                                placeholder="Например: Керамическая кружка с подогревом">
+                    </div>
+
+                    <!-- Падеж, в котором название подставится в шаблон -->
+                    <div class="field">
+                        <label for="name-case">Падеж подстановки названия</label>
+                        <select id="name-case" name="name_case">
+                            <option value="">Авто — по шаблону</option>
+                            <option value="nom">Именительный (кто? что?)</option>
+                            <option value="gen">Родительный (кого? чего?)</option>
+                            <option value="dat">Дательный (кому? чему?)</option>
+                            <option value="acc">Винительный (кого? что?)</option>
+                            <option value="ins">Творительный (кем? чем?)</option>
+                            <option value="prep">Предложный (о ком? о чём?)</option>
+                        </select>
+                        <small class="hint">
+                            Авто: «яркий» и «деловой» — именительный,
+                            «дружелюбный» — винительный (после «про»).
+                            Если автоматика ошиблась — выбери падеж вручную.
+                        </small>
                     </div>
 
                     <!-- Описание товара (обязательное в режиме «Шаблон») -->
@@ -99,14 +123,80 @@
                     </div>
                 </div>
 
+                <!-- ========== ГРУППА ПОЛЕЙ РЕЖИМА «ПАКЕТНАЯ» ========== -->
+                <!-- Список из Excel/CSV: строки генерируются одной кнопкой,
+                     дубликаты проверяются перед загрузкой. -->
+                <div class="mode-group" id="batch-group" hidden>
+
+                    <!-- Чем генерировать: шаблоном или нейросетью -->
+                    <div class="mode-switch mode-switch-inner" role="tablist"
+                         aria-label="Способ пакетной генерации">
+                        <button type="button" class="mode-btn active" data-batch-mode="template">
+                            Шаблон
+                        </button>
+                        <button type="button" class="mode-btn" data-batch-mode="ai">
+                            Нейросеть
+                        </button>
+                    </div>
+
+                    <!-- Поле для вставки строк -->
+                    <div class="field">
+                        <label for="batch-input">
+                            Список товаров <span class="required">*</span>
+                        </label>
+                        <textarea id="batch-input" rows="6" spellcheck="false"
+                                  placeholder="Вставь строки из Excel или CSV — по одной строке на товар"></textarea>
+                        <small class="hint" id="batch-cols-hint">
+                            Колонки через таб, «;» или «,»:
+                            название | описание* | выгода | настроение
+                        </small>
+                        <p class="field-error" id="batch-input-error" hidden></p>
+                    </div>
+
+                    <!-- Загрузка файла CSV/TSV -->
+                    <div class="field">
+                        <label for="batch-file">…или загрузи файл</label>
+                        <input type="file" id="batch-file" accept=".csv,.tsv,.txt">
+                        <small class="hint">
+                            Excel: выдели ячейки → Ctrl+C → вставь в поле выше.
+                            Файлы .xlsx читать не умеем — сохрани лист как CSV.
+                        </small>
+                    </div>
+
+                    <!-- Пример формата -->
+                    <details class="example">
+                        <summary>Пример формата</summary>
+                        <pre id="batch-example">Название	Описание	Выгода	Настроение
+Керамическая кружка	Держит температуру 60 минут	1 990 ₽	яркий
+Набор кистей	12 кистей из натурального ворса	Скидка 20%	дружелюбный</pre>
+                    </details>
+
+                    <!-- Настроение для строк, где оно не указано -->
+                    <div class="field">
+                        <label for="batch-mood">Настроение по умолчанию</label>
+                        <select id="batch-mood">
+                            <option value="яркий">яркий</option>
+                            <option value="деловой">деловой</option>
+                            <option value="дружелюбный">дружелюбный</option>
+                        </select>
+                    </div>
+
+                    <button type="button" class="btn-primary" id="batch-check-btn">
+                        Проверить список
+                    </button>
+
+                    <!-- Итог проверки и загрузки -->
+                    <div class="batch-summary" id="batch-summary" hidden></div>
+                </div>
+
                 <!-- Настроение поста (общее для обоих режимов —
                      тон всегда выбирает пользователь) -->
                 <div class="field">
                     <label for="mood">Настроение поста</label>
                     <select id="mood" name="mood">
-                        <option value="яркий">яркий ✨</option>
-                        <option value="деловой">деловой 📌</option>
-                        <option value="дружелюбный">дружелюбный 💛</option>
+                            <option value="яркий">яркий</option>
+                            <option value="деловой">деловой</option>
+                            <option value="дружелюбный">дружелюбный</option>
                     </select>
                     <!-- Подсказка: как настроить голос, описано в voice.md -->
                     <small class="hint">Тон, длина и эмодзи меняются в файле voice.md</small>
@@ -131,26 +221,81 @@
                     <button type="button" class="btn-secondary" id="copy-btn">
                         Скопировать пост
                     </button>
-                    <!-- Сообщение, которое появляется после нажатия «Скопировать» -->
+                    <!-- Кнопка сохранения поста в «Мои посты» -->
+                    <button type="button" class="btn-primary btn-save" id="save-btn">
+                        Сохранить пост
+                    </button>
+                    <!-- Сообщения после действий -->
                     <span class="copy-feedback" id="copy-feedback" hidden>Пост скопирован</span>
+                    <span class="copy-feedback" id="save-feedback" hidden>Пост сохранён</span>
+                </div>
+
+                <!-- ============ ПОДБОР ХЕШТЕГОВ ============ -->
+                <div class="tags-panel">
+                    <div class="tags-head">
+                        <button type="button" class="btn-secondary" id="hashtags-btn">
+                            Подобрать хештеги
+                        </button>
+                        <span class="hint" id="hashtags-source" hidden></span>
+                    </div>
+
+                    <!-- Здесь JavaScript рендерит чипы с тегами -->
+                    <div class="tags-box" id="tags-box" hidden>
+                        <div class="tags" id="tags"></div>
+                        <div class="tags-foot">
+                            <span class="hint" id="tags-count"></span>
+                            <div class="tags-actions">
+                                <button type="button" class="btn-small" id="tags-copy">
+                                    Скопировать все
+                                </button>
+                                <button type="button" class="btn-small danger" id="tags-clear">
+                                    Очистить
+                                </button>
+                            </div>
+                        </div>
+                        <small class="hint">Клик по тегу — убрать его. Лимит — 30 тегов.</small>
+                    </div>
                 </div>
             </section>
 
         </section>
 
-        <!-- ============ СПРАВОЧНАЯ ПАНЕЛЬ ============ -->
-        <aside class="hint-card">
-            <h3>Как устроены настройки</h3>
-            <ul>
-                <li><b>Тон</b> — яркий, деловой или дружелюбный</li>
-                <li><b>Эмодзи</b> — добавляются в конец поста</li>
-                <li><b>Заголовок</b> — приветствие из шаблона / инструкция для AI</li>
-                <li><b>Нейросеть</b> — ключ API задаётся в файле .env</li>
-            </ul>
-            <p>Полное описание — в файле <code>voice.md</code>.</p>
-        </aside>
+        <!-- ============ СЕКЦИЯ «МОИ ПОСТЫ» ============ -->
+        <!-- Список сохранённых постов: превью, редактирование, удаление -->
+        <section class="card posts-card" id="posts-section">
+            <header class="posts-header">
+                <h2>Мои посты</h2>
+                <span class="posts-counter" id="posts-counter" hidden></span>
+            </header>
+
+            <!-- Сюда JavaScript рендерит карточки постов -->
+            <div class="posts-list" id="posts-list"></div>
+
+            <!-- Пустое состояние, когда постов нет -->
+            <p class="empty-state" id="posts-empty" hidden>
+                Постов пока нет. Сгенерируй пост и нажми «Сохранить пост» —
+                он появится здесь, и к нему всегда можно вернуться.
+            </p>
+        </section>
 
     </main>
+
+    <!-- ============ МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ ============ -->
+    <!-- Используется для удаления поста; позже — для подтверждения дубликатов -->
+    <div class="modal-overlay" id="modal-overlay" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <h3 class="modal-title" id="modal-title"></h3>
+            <div class="modal-text" id="modal-text"></div>
+            <div class="modal-extra" id="modal-extra" hidden></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="modal-cancel">Отмена</button>
+                <button type="button" class="btn-danger" id="modal-confirm">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ ТОСТ С СООБЩЕНИЯМИ ============ -->
+    <div class="toast" id="toast" hidden></div>
 
     <!-- Подключаем скрипт -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
